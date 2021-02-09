@@ -9,41 +9,28 @@ namespace OBS_Net.DAL.ORM.EFCore
 {
     public class ObsContext : DbContext
     {
-        private readonly IConfiguration _configration;
-        public ObsContext(IConfiguration configuration){
-            _configration = configuration;
-            }
-             public ObsContext(DbContextOptions<ObsContext> options) : base(options) { }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
+       
 
-            if (!optionsBuilder.IsConfigured)
+            public ObsContext(DbContextOptions<ObsContext> options)
+           : base(options)
+            { }
+
+            protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
-                optionsBuilder.UseSqlServer(_configration.GetConnectionString("ObsDB"));
+                modelBuilder.Entity<LessonForStudent>()
+                    .HasOne(sa => sa.Student)
+                    .WithMany(sa => sa.MyLessons)
+                    .HasForeignKey(sa => sa.StudentId);
+                modelBuilder.Entity<Lesson>()
+                    .HasOne(sa => sa.Teacher)
+                    .WithMany(sa => sa.MeLessons)
+                    .HasForeignKey(sa => sa.TeacherId);
             }
-        }
-      
+            public DbSet<Lesson> Lessons { get; set; }
+            public DbSet<LessonForStudent> LessonForStudents { get; set; }
+            public DbSet<Student> Students { get; set; }
+            public DbSet<Teacher> Teachers { get; set; }
 
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<LessonForStudent>()
-                 .HasOne(sa => sa.Student)
-                 .WithMany(sa => sa.MyLessons)
-                 .HasForeignKey(sa => sa.StudentId);
-            modelBuilder.Entity<Lesson>()
-                .HasOne(sa => sa.Teacher)
-                .WithMany(sa => sa.MeLessons)
-                .HasForeignKey(sa => sa.TeacherId);
 
         }
-
-        
-        public DbSet<Lesson> Lessons { get; set; }
-
-        public DbSet<LessonForStudent> LessonForStudents { get; set; }
-        public DbSet<Student> Students { get; set; }
-        public DbSet<Teacher> Teachers { get; set; }
-
     }
-}

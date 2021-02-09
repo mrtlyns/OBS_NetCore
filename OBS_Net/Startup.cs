@@ -10,7 +10,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OBS_Net.DAL.ORM.EFCore;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using OBS_Net.Entities.Tables;
+using OBS_Net.BL.StudentManager;
 
 namespace OBS_Net
 {
@@ -26,9 +29,32 @@ namespace OBS_Net
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRazorPages();
-            services.AddDbContext<ObsContext>(opt=>opt.UseSqlServer(Configuration.GetConnectionString("ObsDB")));
 
+            services.AddControllers();
+            //services.AddControllersWithViews();//sonradan ekledim
+            services.AddRazorPages();
+            services.AddDbContext<ObsContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("ObsDB")));
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
+            #region 
+
+
+            //DAL
+            services.AddScoped(typeof(IObsNetRepository<>), typeof(ObsNetRepository<>));
+            //BL
+            services.AddScoped<IStudentManager, StudentManager>();
+            //    services.AddScoped<ITeacherManager, TeacherManager>();
+            //    services.AddScoped<ILessonManager, LessonManager>();
+            //   services.AddScoped<ILessonForStudentManager, LessonForStudentManager>();
+            #endregion
+            #region //Dependency Injection
+
+            //DAL
+            services.AddScoped(typeof(IObsNetRepository<>), typeof(ObsNetRepository<>));
+            //BL
+            //services.AddScoped<IStudentManager, StudentManager>();
+
+            #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,6 +82,13 @@ namespace OBS_Net
             {
                 endpoints.MapRazorPages();
             });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+            });
+
         }
     }
 }

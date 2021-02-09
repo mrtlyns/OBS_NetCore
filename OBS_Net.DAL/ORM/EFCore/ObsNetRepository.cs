@@ -1,24 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.Configuration;
 using System.Linq;
+using System.Text;
 
 namespace OBS_Net.DAL.ORM.EFCore
 {
     public class ObsNetRepository<T> : IObsNetRepository<T> where T : class
     {
-         
-        private ObsContext db ;
+
+        private DbContext db;
         private DbSet<T> tables;
-        public ObsNetRepository(IConfiguration configuration)
+        public ObsNetRepository(ObsContext context)
         {
-            db = new ObsContext(configuration);
+            db = context;
             tables = db.Set<T>();
         }
-
-
         public void Create(T model)
         {
             tables.Add(model);
@@ -49,12 +47,16 @@ namespace OBS_Net.DAL.ORM.EFCore
             return tables.ToList();
         }
 
+        public IQueryable<T> GetQuery()
+        {
+            return tables;
+        }
+
         public T Update(T model)
         {
             tables.Update(model);
             db.SaveChanges();
             return model;
-
         }
     }
 }
